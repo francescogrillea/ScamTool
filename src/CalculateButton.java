@@ -1,9 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import java.math.RoundingMode;
+import java.text.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 import javax.swing.*;
 
@@ -31,7 +31,12 @@ public class CalculateButton implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         SimpleDateFormat d = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALY);
+        int sumAllDays = 0;
+        int[] days = new int[N];
+
+
         try {
+            //Required field
             if(scadenzaField.getText().equals("") || importoField.getText().equals("")){
                 error.setText("Errore: inserisci data e importo della penale");
                 for (int i = 0; i < N; i++) 
@@ -39,44 +44,42 @@ public class CalculateButton implements ActionListener {
                 return;
             }
 
+            //Read all Dates and calculate days after deadline
             scadenza = d.parse(scadenzaField.getText());
-            
             for (int i = 0; i < N; i++){
                 if(dateField[i].getText().equals(""))   
                     dataMovimento[i] = scadenza;
-                else
+                else{
                     dataMovimento[i] = d.parse(dateField[i].getText());
+                    days[i] = (int)( (dataMovimento[i].getTime() - scadenza.getTime()) / (1000 * 60 * 60 * 24) );
+                    if(days[i] > 0)
+                        sumAllDays += days[i];
+                }
+                    
             }                
         } catch (ParseException e1) {
             System.out.println("Error while parsing dates");
         }
 
-        //TODO - insert function here
+        //Calculation Algorithm
+        int importoTotale = Integer.parseInt(importoField.getText());
+        double quotaSingola = 3.6 + 6.99;   //random initialization      
+        
+        //set output format
+        DecimalFormat df = new DecimalFormat("#.###");
+        df.setRoundingMode(RoundingMode.CEILING);
 
-        int importo = Integer.parseInt(importoField.getText());
-        int quota = 0;     
         for (int i = 0; i < N; i++) {
-            if(dataMovimento[i].compareTo(scadenza) <= 0)
-                quota = 0;
+
+            if(days[i] <= 0)
+                quotaSingola = 0;
             else{
-                quota = 20;
-                /*  
-
-                    TODO - calcolare la funzione e mettere il risultato nella variabile quota
-
-                    importo := importo della penale
-                    quota := quanto deve mettere il singolo coinquilino
-                    scadenza := data scadenza bollette
-                    dataMovimento[i] := quando il coinquilino i ha messo i soldi
-
-
-                */
+                quotaSingola = (double)(days[i] * 100) / sumAllDays;
+                quotaSingola = (double)(quotaSingola * importoTotale) / 100;
             }
-            result[i].setText(String.valueOf(quota)+" €");
+            result[i].setText(String.valueOf(df.format(quotaSingola))+" €");
         }
         error.setText("");
     }
-
-
 
 }
