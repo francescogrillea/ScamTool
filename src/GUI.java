@@ -1,6 +1,5 @@
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.border.Border;
 
 public class GUI{
 	
@@ -68,7 +67,7 @@ public class GUI{
 
 			//amount
 			result[i] = new JLabel("");
-			result[i].setBounds(200, 55+40*i, 40, 25);
+			result[i].setBounds(200, 55+40*i, 70, 25);
 			result[i].setForeground(Color.white);
 			panel.add(result[i]);
 		}
